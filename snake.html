@@ -17,8 +17,10 @@ var xpos = gridLength/2, ypos = gridLength/2;
 var applexpos = 2 * tileSize, appleypos = 2 * tileSize;
 var trail = [];
 var tail = 3;
-var points = 0;
+var score = 0;
+var topScore = 0;
 var state = true;
+var snoozed = false;
 
 document.addEventListener('DOMContentLoaded', function() {
     canv = document.getElementById('snakecanvas');
@@ -78,8 +80,8 @@ function game() {
     
     //snake easts apple and position the next apple somewhere that isn't in the head of tail
     if (xpos == applexpos && ypos == appleypos) {
-        points++;
         tail++;
+        score++;
         var reposition = false;
         while (true)
         {
@@ -107,49 +109,63 @@ function game() {
     ctx.fillStyle = 'green';
     ctx.fillRect(applexpos, appleypos, tileSize, tileSize);
     
-    //draw score
+    //draw score and top score
     ctx.font = '12px Consolas, Arial';
     ctx.fillStyle = 'white';
-    ctx.fillText('Score: ' + points, 8, 15);
+    ctx.fillText('Score: ' + score, 8, 15);
+    ctx.fillText('Top Score: ' + topScore, 120, 15);
+    
+    //release snooze
+    snoozed = false;
 }
 function keyPush(evt) {
-    switch (evt.keyCode) {
-        //left
-        case 37:
-            if (xvel != tileSize) {
-                xvel = -tileSize;
-                yvel =  0;
-            }
-            break;
-        //up
-        case 38:
-            if (yvel != tileSize) {
-                xvel =  0;
-                yvel = -tileSize;
-            }
-            break;
-        //right
-        case 39:
-            if (xvel != -tileSize) {
-                xvel = tileSize;
-                yvel = 0;
-            }
-            break;
-        //down
-        case 40:
-            if (yvel != -tileSize) {
-                xvel = 0;
-                yvel = tileSize;
-            }
-            break;
-        case 80:
-        case 112:
-            state = !state;
-            break;
+    if (!snoozed)
+    {
+        switch (evt.keyCode) {
+            //left
+            case 37:
+                if (xvel != tileSize) {
+                    xvel = -tileSize;
+                    yvel = 0;
+                    snoozed = true;
+                }
+                break;
+            //up
+            case 38:
+                if (yvel != tileSize) {
+                    xvel = 0;
+                    yvel = -tileSize;
+                    snoozed = true;
+                }
+                break;
+            //right
+            case 39:
+                if (xvel != -tileSize) {
+                    xvel = tileSize;
+                    yvel = 0;
+                    snoozed = true;
+                }
+                break;
+            //down
+            case 40:
+                if (yvel != -tileSize) {
+                    xvel = 0;
+                    yvel = tileSize;
+                    snoozed = true;
+                }
+                break;
+            case 80:
+            case 112:
+                state = !state;
+                break;
+        }
     }
 }
 function reset() {
-    points = 0;
+    if (score > topScore) {
+        topScore = score;
+    }
+    score = 0;
     tail = 3;
     trail = [];
     xpos = ypos = gridLength/2;
