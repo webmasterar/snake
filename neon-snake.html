@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Snake Game</title>
+</head>
+<body>
+<canvas width="400" height="400" id="snakecanvas"></canvas>
+<p><small>Controls: Left, Right, Up, Down arrows. Press P to pause/continue.</small><p>
+<p><small>License MIT (2017) Ahmad Retha. <a href="https://github.com/webmasterar/snake">Back to Github</a>.
+<script type="text/javascript">
+var canv, ctx;
+var tileSize = 20;
+var gridLength = 20 * 20; //400
+var xvel = tileSize, yvel = 0;
+var xpos = gridLength/2, ypos = gridLength/2;
+var applexpos = 2 * tileSize, appleypos = 2 * tileSize;
+var trail = [];
+var tail = 3;
+var score = 0;
+var topScore = 0;
+var state = true;
+var snoozed = false;
+
+document.addEventListener('DOMContentLoaded', function() {
+    canv = document.getElementById('snakecanvas');
+    ctx = canv.getContext('2d');
+    document.addEventListener('keydown', keyPush);
+    setInterval(game, 1000/10);
+});
+
+function game() {
+    //draw arena
+    ctx.fillStyle = '#ffe700';
+    ctx.fillRect(0, 0, gridLength, gridLength);
+    
+    if (!state) {
+        ctx.font = '36px Consolas, Arial';
+        ctx.fillStyle = '#001eff';
+        ctx.fillText('PAUSED', (gridLength/2) - 55, (gridLength/2) - 15);
+        ctx.font = '10px Consolas, Arial';
+        ctx.fillText('(Press P to continue)', (gridLength/2) - 52, gridLength/2);
+        return;
+    }
+
+    //move head - including wrap-around
+    xpos += xvel;
+    ypos += yvel;
+    if (xpos < 0) {
+        xpos = gridLength - tileSize;
+    }
+    else if (xpos > gridLength - tileSize) {
+        xpos = 0;
+    }
+    else if (ypos < 0) {
+        ypos = gridLength - tileSize;
+    }
+    else if (ypos > gridLength - tileSize) {
+        ypos = 0;
+    }
+    
+    //draw head
+    ctx.fillStyle = '#f000ff';
+    ctx.fillRect(xpos, ypos, tileSize, tileSize);
+    
+    //draw tail and check for collision
+    ctx.fillStyle = '#f000ff';
+    for (var i = 0; i < trail.length; i++) {
+        ctx.fillRect(trail[i].x, trail[i].y, tileSize, tileSize);
+        if (xpos == trail[i].x && ypos == trail[i].y) {
+            reset();
+        }
+    }
+    
+    //update tail
+    trail.unshift({x:xpos, y:ypos});
+    if (trail.length > tail) {
+        trail.pop();
+    }
+    
+    // snake eats apple and position the next apple somewhere that isn't in the head or tail
+    if (xpos == applexpos && ypos == appleypos) {
+        tail++;
+        score++;
+        var reposition = false;
+        while (true)
+        {
+            applexpos = Math.floor(Math.random() * 10) * (gridLength/tileSize * 2);
+            appleypos = Math.floor(Math.random() * 10) * (gridLength/tileSize * 2);
+            if (applexpos == xpos && appleypos == ypos) {
+                reposition = true;
+            } else {
+                for (var i = 0; i < trail.length; i++) {
+                    if (applexpos == trail[i].x && appleypos == trail[i].y) {
+                        reposition = true;
+                        break;
+                    }
+                }
+            }
+            if (reposition) {
+                reposition = false;
+                continue;
+            }
+            break;
+        }
+    }
+
+    //draw apple
+    ctx.fillStyle = '#74ee15';
+    ctx.fillRect(applexpos, appleypos, tileSize, tileSize);
+    
+    //draw score and top score
+    ctx.font = '12px Consolas, Arial';
+    ctx.fillStyle = '#001eff';
+    ctx.fillText('Score: ' + score, 8, 15);
+    ctx.fillText('Top Score: ' + topScore, 120, 15);
+    
+    //release snooze
+    snoozed = false;
+}
+function keyPush(evt) {
+    if (!snoozed)
+    {
+        switch (evt.keyCode) {
+            //left
+            case 37:
+                if (xvel != tileSize) {
+                    xvel = -tileSize;
+                    yvel = 0;
+                    snoozed = true;
+                }
+                break;
+            //up
+            case 38:
+                if (yvel != tileSize) {
+                    xvel = 0;
+                    yvel = -tileSize;
+                    snoozed = true;
+                }
+                break;
+            //right
+            case 39:
+                if (xvel != -tileSize) {
+                    xvel = tileSize;
+                    yvel = 0;
+                    snoozed = true;
+                }
+                break;
+            //down
+            case 40:
+                if (yvel != -tileSize) {
+                    xvel = 0;
+                    yvel = tileSize;
+                    snoozed = true;
+                }
+                break;
+            case 80:
+            case 112:
+                state = !state;
+                break;
+        }
+    }
+}
+function reset() {
+    if (score > topScore) {
+        topScore = score;
+    }
+    score = 0;
+    tail = 3;
+    trail = [];
+    xpos = ypos = gridLength/2;
+    yvel = 0;
+    xvel = tileSize;
+}
+</script>
+</body>
+</html>
