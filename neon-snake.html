@@ -5,9 +5,11 @@
 <title>Snake Game</title>
 </head>
 <body>
+
 <canvas width="400" height="400" id="snakecanvas"></canvas>
-<p><small>Controls: Left, Right, Up, Down arrows. Press P to pause/continue.</small><p>
-<p><small>License MIT (2017) Ahmad Retha. <a href="https://github.com/webmasterar/snake">Back to Github</a>.
+<p><small>Controls: Left, Right, Up, Down arrows. Press P to pause/continue. Press F to go fullscreen.</small><p>
+<p><small>License MIT (2017-2025) Ahmad Retha. <a href="https://github.com/webmasterar/snake">Back to Github</a>.
+
 <script type="text/javascript">
 var canv, ctx;
 var tileSize = 20;
@@ -78,7 +80,7 @@ function game() {
         trail.pop();
     }
     
-    // snake eats apple and position the next apple somewhere that isn't in the head or tail
+    //snake eats apple and position the next apple somewhere that isn't in the head or tail
     if (xpos == applexpos && ypos == appleypos) {
         tail++;
         score++;
@@ -154,6 +156,18 @@ function keyPush(evt) {
                     snoozed = true;
                 }
                 break;
+            //F - fullscreen
+            case 70:
+            case 102:
+                if (!document.fullscreenElement) {
+                    canv.requestFullscreen().catch(err => {
+                        alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                    });
+                } else {
+                    document.exitFullscreen();
+                }
+                break;
+            //P - pause
             case 80:
             case 112:
                 state = !state;
@@ -161,6 +175,7 @@ function keyPush(evt) {
         }
     }
 }
+
 function reset() {
     if (score > topScore) {
         topScore = score;
